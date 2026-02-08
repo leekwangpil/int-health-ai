@@ -49,9 +49,6 @@ type PreVisitBriefing = {
   pregnancyRelated: string;
 };
 
-/** 관리자 비밀번호: env 우선, fallback "int358" (개발용) */
-const ADMIN_PASS = process.env.NEXT_PUBLIC_ADMIN_PASS || "int358";
-
 const MAX_DEFAULT = 3;
 const MAX_EXPANDED = 15;
 
@@ -661,14 +658,27 @@ export default function Home() {
     return lines.join("\n");
   }
 
-  /** 관리자 비밀번호 확인 */
-  function handleAdminAuth() {
-    if (adminPw === ADMIN_PASS) {
-      setAdminAuthed(true);
-      setAdminMsg("");
-    } else {
-      setAdminAuthed(false);
-      setAdminMsg("비밀번호가 올바르지 않습니다.");
+  /** 관리자 비밀번호 확인 (API를 통해 서버에서 검증) */
+  async function handleAdminAuth() {
+    if (!adminPw) {
+      setAdminMsg("비밀번호를 입력해주세요.");
+      return;
+    }
+    try {
+      const res = await fetch("/api/admin/quota", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password: adminPw }),
+      });
+      if (res.ok) {
+        setAdminAuthed(true);
+        setAdminMsg("");
+      } else {
+        setAdminAuthed(false);
+        setAdminMsg("비밀번호가 올바르지 않습니다.");
+      }
+    } catch {
+      setAdminMsg("서버 연결에 실패했습니다.");
     }
   }
 
