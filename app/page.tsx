@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -79,6 +79,8 @@ export default function Home() {
   const [collapsedSections, setCollapsedSections] = useState<Record<string, boolean>>({});
   const [copyStatus, setCopyStatus] = useState<"idle" | "success" | "error">("idle");
   const [remainingCount, setRemainingCount] = useState<number>(30);
+
+  const summaryRef = useRef<HTMLDivElement>(null);
 
   /* ── 관리자 리셋 상태 ── */
   const [adminOpen, setAdminOpen] = useState(false);
@@ -290,6 +292,9 @@ export default function Home() {
       setRedFlags(Array.isArray(data.redFlags) ? data.redFlags : []);
       setSources(Array.isArray(data.sources) ? data.sources : []);
       setIntakeStage("final");
+      setTimeout(() => {
+        summaryRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 100);
     } catch (e: unknown) {
       const message =
         e instanceof Error ? e.message : "네트워크 오류가 발생했습니다.";
@@ -1279,6 +1284,7 @@ export default function Home() {
               {/* ── 의사에게 전달할 요약 ── */}
               {briefing && (
                 <div
+                  ref={summaryRef}
                   style={{
                     marginTop: 16,
                     backgroundColor: "#ffffff",
